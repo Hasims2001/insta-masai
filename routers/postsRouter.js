@@ -6,13 +6,12 @@ require('dotenv').config();
 
 const postsRouter = express.Router();
 
-postsRouter.use(auth);
 
-postsRouter.get('/', async (req, res) => {
+postsRouter.get('/', auth, async (req, res) => {
     const { userId } = req.body;
     if (userId) {
         try {
-            const posts = await PostModel.find({ userId: userId });
+            const posts = await PostModel.find({ userId }).limit(2);
             res.status(200).send({ posts, issue: false });
         } catch (error) {
             res.status(400).send({ "error": error.message, issue: true })
@@ -24,13 +23,13 @@ postsRouter.get('/', async (req, res) => {
 });
 
 
-postsRouter.post('/add', async (req, res) => {
-    const { userId } = req.body;
-    const { title, body, device, no_of_comments } = req.body;
+postsRouter.post('/add', auth, async (req, res) => {
+    const { userId, title, body, device, no_of_comments } = req.body;
+
     if (userId) {
         try {
             const newPost = new PostModel({
-                userId: userId,
+                userId: req.body.userId,
                 name: req.body.name,
                 title,
                 body,
@@ -49,7 +48,7 @@ postsRouter.post('/add', async (req, res) => {
 });
 
 
-postsRouter.patch('/update/:postId', async (req, res) => {
+postsRouter.patch('/update/:postId', auth, async (req, res) => {
     const { userId } = req.body;
     const { postId } = req.params;
     if (userId) {
@@ -73,7 +72,7 @@ postsRouter.patch('/update/:postId', async (req, res) => {
 
 
 
-postsRouter.delete('/delete/:postId', async (req, res) => {
+postsRouter.delete('/delete/:postId', auth, async (req, res) => {
     const { userId } = req.body;
     const { postId } = req.params;
     if (userId) {

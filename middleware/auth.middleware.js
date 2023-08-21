@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const auth = async (req, res, next) => {
     const token = req.headers.auth;
-    console.log(token);
+
     if (token) {
         try {
             const findToken = await blacklistModel.findOne({ token });
@@ -18,8 +18,12 @@ const auth = async (req, res, next) => {
                 jwt.verify(token, process.env.TOKEN_KEY, (err, result) => {
                     if (err) return err;
                     if (result) {
-                        req.body.name = result.name;
-                        req.body.userId = result.id;
+                        let obj = {
+                            ...req.body,
+                            userId: result.id,
+                            name: result.name
+                        }
+                        req.body = obj
                         next();
                     }
                 })
